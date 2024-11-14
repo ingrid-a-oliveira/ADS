@@ -22,6 +22,7 @@ class Cadastros:
             Produto(6, "Produto F", "Prateleira 6", 250, 8.0, 12.0),
             Produto(7, "Produto G", "Prateleira 7", 120, 10.5, 15.5)
         ]
+        self.movimentacoes = []  # Lista para registrar movimentações
 
     def check_permission(self, requisitos_funcoes):
         return self.profissao in requisitos_funcoes
@@ -148,6 +149,7 @@ class Cadastros:
             for itens in self.produtos:
                 if idproduto == itens.idproduto:
                     itens.quantidade += quantidade_entrada
+                    self.movimentacoes.append((idproduto, quantidade_entrada, "Entrada"))
                     print(f"A quantidade do produto {itens.produto} foi aumentada em {quantidade_entrada}. Novo estoque: {itens.quantidade}")
                     return
             print("Produto não encontrado.")
@@ -172,11 +174,23 @@ class Cadastros:
                         return
                     else:
                         itens.quantidade -= quantidade_saida
+                        self.movimentacoes.append((idproduto, quantidade_saida, "Saída"))
                         print(f"A quantidade do produto {itens.produto} foi reduzida em {quantidade_saida}. Novo estoque: {itens.quantidade}")
                         return
             print("Produto não encontrado.")
         except ValueError:
             print("Entrada inválida! Certifique-se de inserir valores numéricos válidos.")
+
+    def gerar_relatorio_movimentacao(self):
+        if not self.check_permission(["gerente"]):
+            print("Acesso negado.")
+            return
+        print("\nRelatório de Movimentação de Produtos:")
+        if not self.movimentacoes:
+            print("Nenhuma movimentação registrada.")
+        else:
+            for mov in self.movimentacoes:
+                print(f"ID Produto: {mov[0]} | Quantidade: {mov[1]} | Tipo: {mov[2]}")
 
     def visualizar_produtos(self):
         if not self.check_permission(["gerente", "estoquista", "atendente"]):
@@ -200,6 +214,7 @@ class Cadastros:
             print("6. Registro de Entrada")
             print("7. Registro de Saída")
             print("8. Visualizar Todos os Produtos")
+            print("9. Relatório de Movimentação")
             print("0. Sair")
 
             opcao = input("Escolha a opção: ")
@@ -219,6 +234,8 @@ class Cadastros:
                 self.registro_saida()
             elif opcao == "8":
                 self.visualizar_produtos()
+            elif opcao == "9":
+                self.gerar_relatorio_movimentacao()
             elif opcao == "0":
                 break
             else:
